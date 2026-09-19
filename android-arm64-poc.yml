@@ -1,0 +1,81 @@
+name: Android ARM64 POC
+
+on:
+workflow_dispatch:
+push:
+branches:
+- android-arm64-poc
+paths:
+- "Source/Android/FreeTrainSimulator.Android/**"
+- ".github/workflows/android-arm64-poc.yml"
+- "Source/global.json"
+
+permissions:
+contents: read
+
+jobs:
+build-android-arm64-poc:
+name: Build Android ARM64 POC APK
+runs-on: ubuntu-latest
+
+steps:
+  - name: Check out repository
+    uses: actions/checkout@v4
+
+  - name: Set up Java 17
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: "17"
+
+  - name: Set up .NET 10 SDK
+    uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: "10.0.x"
+
+  - name: Set up Android SDK
+    uses: android-actions/setup-android@v4
+
+  - name: Install Android SDK components
+    run: |
+      sdkmanager --install \
+        "platform-tools" \
+        "platforms;android-35" \
+        "build-tools;35.0.0" \
+        "cmdline-tools;latest"
+      yes | sdkmanager --licenses >/dev/null || true
+
+  - name: Install .NET Android workload
+    run: dotnet workload install android --skip-manifest-update
+
+  - name: Restore Android POC
+    run: dotnet restore Source/Android/FreeTrainSimulator.Android/FreeTrainSimulator.Android.csproj -r android-arm64
+
+  - name: Build Debug ARM64 APK
+    run: >
+      dotnet build Source/Android/FreeTrainSimulator.Android/FreeTrainSimulator.Android.csproj
+      --configuration Debug
+      --framework net10.0-android
+      --runtime android-arm64
+      --no-restore
+      -p:AndroidPackageFormat=apk
+
+  - name: Locate APK
+    id: apk
+    shell: bash
+    run: |
+      set -euo pipefail
+      apk="$(find Source/Android/FreeTrainSimulator.Android/bin/Debug -type f -name '*.apk' -print -quit)"
+      if [[ -z "$apk" ]]; then
+        echo "No APK was produced." >&2
+        exit 1
+      fi
+      echo "path=$apk" >> "$GITHUB_OUTPUT"
+      echo "APK: $apk"
+
+  - name: Upload Debug ARM64 APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: fts-android-arm64-poc-debug
+      path: ${{ steps.apk.outputs.path }}
+      if-no-files-found: error
