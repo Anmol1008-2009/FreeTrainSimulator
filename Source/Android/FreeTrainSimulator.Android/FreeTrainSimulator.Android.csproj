@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
+    <OutputType>Exe</OutputType>
+    <AndroidApplication>true</AndroidApplication>
+    <SupportedOSPlatformVersion>21.0</SupportedOSPlatformVersion>
+    <ApplicationId>com.anmol1008.fts.androidpoc</ApplicationId>
+    <ApplicationTitle>FTS Android POC</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>0.1.0</ApplicationDisplayVersion>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <AndroidLinkMode>None</AndroidLinkMode>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.Android" Version="3.8.4" />
+  </ItemGroup>
+</Project>
